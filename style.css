@@ -9,6 +9,11 @@
 #tcal .tc-archives button{color:#ce6258;background:#fff;border:1px solid #eee3e0;border-radius:6px;text-align:left;font-size:11px;padding:6px 8px;overflow-wrap:anywhere;white-space:normal;min-width:0}
 #tcal .tc-archives button:hover{background:#fff1ed}
 #tcal .tc-archives button:disabled{opacity:.5;cursor:wait}
+#tcal header>div{min-width:0}
+#tcal .tc-close{flex-shrink:0;margin-left:10px}
+#tcal h1{display:flex;align-items:baseline;flex-wrap:wrap;column-gap:12px;row-gap:2px}
+#tcal h1 .tc-title-meta{display:inline-flex;align-items:baseline;gap:7px;margin-left:0;white-space:nowrap}
+#tcal h1 .tc-signature{font-size:10px;font-weight:400;color:#9b929b;letter-spacing:.1px}
 #tcal .tc-tabs{display:flex;gap:4px;margin:16px 28px 0;background:#f3f1f4;border-radius:10px;padding:4px;width:max-content}
 #tcal .tc-tabs button{padding:6px 18px;border-radius:7px;color:#888}
 #tcal .tc-tabs button[aria-pressed=true]{background:#fff;color:#e35950;box-shadow:0 1px 5px #0001}
@@ -39,3 +44,10 @@
 #tcal .tc-loading strong{font-size:22px;color:#e2675b;display:block}
 #tcal .tc-loading small{display:block;color:#aaa;font-size:11px;margin-top:18px}
 @media(max-width:700px){#tcal h1{font-size:22px}#tcal h1 span{font-size:12px;margin-left:8px}#tcal nav{gap:4px}#tcal nav button{padding:5px 7px}#tcal .tc-tabs{margin-left:18px}#tcal .tc-year-summary{padding:14px;align-items:flex-start;flex-direction:column;gap:4px}#tcal .tc-year-row{grid-template-columns:30px minmax(0,1fr) 66px 20px;gap:6px}#tcal .tc-year-row strong{font-size:12px}#tcal .tc-loading{padding:55px 24px}}
+/* Reserve a separate row for overflow counts, including on narrow screens. */
+#tcal .tc-day{height:98px;min-height:98px;padding:6px 3px 8px;display:grid;grid-template-rows:28px 51px;gap:3px;align-content:start;overflow:hidden}
+#tcal .tc-number{justify-self:center;align-self:start;flex-shrink:0;line-height:28px}
+#tcal .tc-events{display:grid;grid-template-rows:16px 16px 15px;gap:2px;min-width:0;align-content:start}
+#tcal .tc-chip{height:16px;line-height:16px;margin:0;min-width:0;font-size:10px}
+#tcal .tc-more{display:block;grid-row:3;height:15px;line-height:15px;padding-left:3px;font-size:10px;color:#77717b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#tcal .tc-chip .tc-medal{line-height:1;vertical-align:baseline}
