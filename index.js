@@ -73,6 +73,21 @@
  }
  function close(){document.querySelector('#tcal')?.remove();lastFocus?.focus();}
  function open(){if(document.querySelector('#tcal'))return;lastFocus=document.activeElement;const root=document.createElement('div');root.id='tcal';document.body.append(root);root.addEventListener('click',e=>{if(e.target===root){close();return;}const b=e.target.closest('button');if(!b)return;if(b.dataset.day){selected=b.dataset.day;render();return;}switch(b.dataset.action){case'close':close();break;case'prev':month.setMonth(month.getMonth()-1);render();break;case'next':month.setMonth(month.getMonth()+1);render();break;case'today':selected=key(new Date());month=new Date(new Date().getFullYear(),new Date().getMonth(),1);render();break;case'refresh':refresh();}});root.addEventListener('keydown',e=>{if(e.key==='Escape')close();if(e.key==='Tab'){const items=[...root.querySelectorAll('button:not(:disabled)')];if(e.shiftKey&&document.activeElement===items[0]){e.preventDefault();items.at(-1).focus();}else if(!e.shiftKey&&document.activeElement===items.at(-1)){e.preventDefault();items[0].focus();}}});render();root.querySelector('button').focus();if(!scanned)refresh();}
- function mount(){if(document.querySelector('#tcal-launch'))return;const host=document.querySelector('#extensions_menu');if(!host)return;const b=document.createElement('button');b.id='tcal-launch';b.className='list-group-item flex-container flexGap5';b.textContent='▦ 酒馆日历';b.onclick=open;host.append(b);}
- window.TavernCalendar={open,refresh,dateOf,aggregate};mount();const observer=new MutationObserver(mount);observer.observe(document.body,{childList:true,subtree:true});
+ function mount(){
+   const host=document.querySelector('#extensionsMenu')||document.querySelector('#extensions_menu');
+   if(host&&!document.querySelector('#tcal-launch')){
+     const b=document.createElement('div');b.id='tcal-launch';b.className='list-group-item flex-container flexGap5';b.setAttribute('role','button');b.tabIndex=0;
+     b.innerHTML='<div class="fa-fw fa-solid fa-calendar-days extensionsMenuExtensionButton"></div><span>酒馆日历</span>';
+     b.onclick=open;b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}};host.append(b);
+   }
+   const settings=document.querySelector('#extensions_settings2')||document.querySelector('#extensions_settings');
+   if(settings&&!document.querySelector('#tcal-settings')){
+     const panel=document.createElement('div');panel.id='tcal-settings';panel.className='extension_container';
+     panel.innerHTML='<div class="inline-drawer"><div class="inline-drawer-toggle inline-drawer-header"><b>酒馆日历</b><div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div></div><div class="inline-drawer-content"><p>按天回看和角色的聊天足迹。</p><button type="button" class="menu_button" id="tcal-settings-open">打开酒馆日历</button><small>也可从输入框旁的扩展快捷菜单打开。</small></div></div>';
+     panel.querySelector('button').onclick=open;settings.append(panel);
+   }
+ }
+ function boot(){mount();const observer=new MutationObserver(mount);observer.observe(document.body,{childList:true,subtree:true});}
+ window.TavernCalendar={open,refresh,dateOf,aggregate};
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
