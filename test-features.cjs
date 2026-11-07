@@ -16,5 +16,12 @@ const ranks=await page.evaluate(()=>TavernCalendar.monthlyRanks({'2026-01-01':{a
 await page.getByRole('button',{name:'上个月',exact:true}).click();assert.equal(await page.locator('.tc-podium>span').count(),0);await page.getByRole('button',{name:'今天',exact:true}).click();
 await page.evaluate(()=>window.missing=true);await page.locator('.tc-archives button').first().click();await page.waitForFunction(()=>document.querySelector('#tcal footer').textContent.includes('存档已删除'));assert.equal(await page.evaluate(()=>window.jumpArgs),undefined);
 await page.evaluate(()=>window.missing=false);await page.locator('.tc-archives button[data-avatar="1.png"][data-file="branch"]').click();await page.waitForFunction(()=>!document.querySelector('#tcal'));assert.deepEqual(await page.evaluate(()=>window.jumpArgs),[1,{chatFile:'branch'}]);
-await page.click('#tcal-launch');assert(await page.evaluate(()=>document.querySelector('.tc-shell').scrollWidth<=document.querySelector('.tc-shell').clientWidth));assert(await page.locator('.tc-signature').isVisible());assert(await page.locator('.tc-more').evaluateAll(nodes=>nodes.every(n=>{const cell=n.closest('.tc-day').getBoundingClientRect(),r=n.getBoundingClientRect();return r.bottom<=cell.bottom-5&&r.top>=cell.top+60;})));await page.screenshot({path:__dirname+'/preview-features.png'});console.log('PASS monthly ranks, deduped archive links, deleted archive, cross-character jump, month navigation, mobile layout');
+await page.click('#tcal-launch');assert(await page.evaluate(()=>document.querySelector('.tc-shell').scrollWidth<=document.querySelector('.tc-shell').clientWidth));assert(await page.locator('.tc-signature').isVisible());assert(await page.locator('.tc-more').evaluateAll(nodes=>nodes.every(n=>{const cell=n.closest('.tc-day').getBoundingClientRect(),r=n.getBoundingClientRect();return r.bottom<=cell.bottom-5&&r.top>=cell.top+60;})));await page.screenshot({path:__dirname+'/preview-features.png'});
+assert.equal(await page.locator('.tc-crown svg').count(),1);
+assert.equal(await page.locator('.tc-crown').evaluate(el=>getComputedStyle(el).mixBlendMode),'multiply');
+assert.equal(await page.locator('.tc-selected .tc-royal').count(),1);
+await page.locator('.tc-day:not(.tc-selected):not(.tc-out)').first().click();
+assert.equal(await page.locator('.tc-selected .tc-royal').count(),0);
+assert.equal(await page.locator('.tc-crown svg').count(),1);
+await page.screenshot({path:__dirname+'/crown-unselected.png'});console.log('PASS monthly ranks, deduped archive links, deleted archive, cross-character jump, month navigation, mobile layout');
 }finally{await browser.close();}})().catch(e=>{console.error(e);process.exit(1)});
