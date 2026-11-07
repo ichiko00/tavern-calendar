@@ -115,16 +115,27 @@
    const total=months.reduce((a,m)=>a+m.total,0),active=months.reduce((a,m)=>a+m.days,0);
    return '<div class="tc-year-summary"><b>'+total.toLocaleString()+'<small> 楼年度对话</small></b><span>'+active+' 天相伴 · '+months.filter(m=>m.total>0).length+' 个活跃月份</span></div><div class="tc-year-chart" aria-label="全年各月聊天楼数">'+months.map(m=>'<button class="tc-year-row" data-action="pick-month" data-month="'+m.month+'" aria-label="'+m.month+'月，'+m.total+'楼'+(m.rank?'，年度第'+m.rank+'名':'')+'"><span>'+m.month+'月</span><span class="tc-bar-track"><span class="tc-bar tc-rank-'+m.rank+'" style="width:'+m.total/max*100+'%"></span></span><strong>'+m.total.toLocaleString()+' <small>楼</small></strong><span class="tc-year-medal">'+(m.rank?['🥇','🥈','🥉'][m.rank-1]:'')+'</span></button>').join('')+'</div><p class="tc-year-hint">条形长度表示该月总楼数；点击月份查看日历。仅有聊天的月份参与颁奖，同分按月份先后排序。</p>';
  }
+ function busiestDays(data,prefix){
+   let max=0;const dates=[];
+   for(const [day,rows] of Object.entries(data)){
+     if(!day.startsWith(prefix+'-'))continue;
+     const total=Object.values(rows).reduce((sum,r)=>sum+r.user+r.char,0);
+     if(total>max){max=total;dates.length=0;dates.push(day);}
+     else if(total>0&&total===max)dates.push(day);
+   }
+   return {dates,total:max};
+ }
  function render() {
    const root=document.querySelector('#tcal'); if(!root)return;
    const title=`<label><input data-period="year" aria-label="年份" type="number" min="100" max="9999" value="${month.getFullYear()}">年</label>${view==='month'?`<label><input data-period="month" aria-label="月份" type="number" min="1" max="12" value="${month.getMonth()+1}">月</label>`:''}`;
    const leaders=monthlyRanks(days,key(month).slice(0,7));
+   const busiest=busiestDays(days,key(month).slice(0,7));
    const badge=avatar=>{const rank=leaders.findIndex(r=>r.avatar===avatar);return rank<0?'':`<span class="tc-medal" title="${month.getMonth()+1}月第${rank+1}名 · ${leaders[rank].total}楼" aria-label="本月第${rank+1}名">${['🥇','🥈','🥉'][rank]}</span>`;};
    const start=new Date(month.getFullYear(),month.getMonth(),1); start.setDate(1-(start.getDay()+6)%7);
    let cells='';
    for(let i=0;i<42;i++){
      const d=new Date(start);d.setDate(start.getDate()+i); const k=key(d), rows=Object.values(days[k]||{});
-     cells+=`<button class="tc-day ${d.getMonth()!==month.getMonth()?'tc-out':''} ${k===selected?'tc-selected':''} ${k===key(new Date())?'tc-today':''}" data-day="${k}" aria-label="${k}，${rows.length} 位角色" aria-pressed="${k===selected}"><span class="tc-number">${d.getDate()}</span><span class="tc-events">${rows.slice(0,2).map(r=>`<span class="tc-chip" style="--char-color:${color(r.avatar)}">${badge(r.avatar)}${esc(r.name)}</span>`).join('')}${rows.length>2?`<span class="tc-more">+${rows.length-2} 位</span>`:''}</span><span class="tc-dots">${rows.slice(0,4).map(r=>`<i style="background:${color(r.avatar)}"></i>`).join('')}</span></button>`;
+     cells+=`<button class="tc-day ${d.getMonth()!==month.getMonth()?'tc-out':''} ${k===selected?'tc-selected':''} ${k===key(new Date())?'tc-today':''}" data-day="${k}" aria-label="${k}，${rows.length} 位角色" aria-pressed="${k===selected}"><span class="tc-number">${d.getDate()}${busiest.dates.includes(k)?`<span class="tc-crown" title="当月聊天最多的一天 · ${busiest.total} 楼" aria-label="当月聊天最多的一天，${busiest.total}楼">👑</span>`:''}</span><span class="tc-events">${rows.slice(0,2).map(r=>`<span class="tc-chip" style="--char-color:${color(r.avatar)}">${badge(r.avatar)}${esc(r.name)}</span>`).join('')}${rows.length>2?`<span class="tc-more">+${rows.length-2} 位</span>`:''}</span><span class="tc-dots">${rows.slice(0,4).map(r=>`<i style="background:${color(r.avatar)}"></i>`).join('')}</span></button>`;
    }
    const rows=Object.values(days[selected]||{}).sort((a,b)=>a.first-b.first), total=rows.reduce((s,r)=>s+r.user+r.char,0);
    const date=new Date(selected+'T12:00:00');
@@ -158,6 +169,6 @@
    }
  }
  function boot(){mount();const observer=new MutationObserver(mount);observer.observe(document.body,{childList:true,subtree:true});}
- window.TavernCalendar={open,refresh,dateOf,aggregate,monthlyRanks,yearSummary};
+ window.TavernCalendar={open,refresh,dateOf,aggregate,monthlyRanks,yearSummary,busiestDays};
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
