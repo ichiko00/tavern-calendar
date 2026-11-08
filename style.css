@@ -82,3 +82,5 @@
 #tcal .tc-body>main,#tcal .tc-body>aside{display:block;position:static;float:none;width:auto;max-width:none;min-width:0;margin:0;transform:none;writing-mode:horizontal-tb}
 @media(min-width:701px){#tcal .tc-body:not(.tc-year-body):not(.tc-loading-body){display:grid;grid-template-columns:minmax(0,1fr) 310px;grid-auto-flow:row;align-items:stretch}#tcal .tc-body>main{grid-column:1;grid-row:1}#tcal .tc-body>aside{grid-column:2;grid-row:1}}
 @media(max-width:700px){#tcal .tc-body{display:block}#tcal .tc-body>main,#tcal .tc-body>aside{grid-column:auto;grid-row:auto}}
+#tcal-settings-open{display:inline-flex;width:auto;min-width:max-content;max-width:none;white-space:nowrap;word-break:keep-all;overflow-wrap:normal;writing-mode:horizontal-tb;flex-shrink:0}
+#tcal-launch{width:auto;white-space:nowrap;word-break:keep-all;writing-mode:horizontal-tb}

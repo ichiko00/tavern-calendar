@@ -5,6 +5,10 @@
  const key = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
  function dateOf(v) {
    if (v == null || v === '') return null;
+   if(typeof v==='number'||(typeof v==='string'&&/^\d+$/.test(v.trim()))){const d=new Date(Number(v));return Number.isFinite(d.getTime())?d:null;}
+   // Match ST legacy humanized timestamps, which represent UTC (including milliseconds).
+   const legacy=typeof v==='string'&&v.trim().match(/^(\d{4})-(\d{1,2})-(\d{1,2})\s*@\s*(\d{1,2})h\s*(\d{1,2})m\s*(\d{1,2})s(?:\s*(\d{1,3})ms)?$/);
+   if(legacy){const [,y,mo,day,h,mi,sec,ms]=legacy;const d=new Date(Date.UTC(+y,+mo-1,+day,+h,+mi,+sec,+(ms||0)));return +mo>=1&&+mo<=12&&+day>=1&&d.getUTCDate()===+day&&+h<24&&+mi<60&&+sec<60?d:null;}
    if(typeof v==='string') v=v.replace(/(\d{1,2})h(\d{2})m(\d{2})s/, '$1:$2:$3').replace(/(\d)(am|pm)$/i,'$1 $2');
    const m = typeof v === 'string' && v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})[ @]+(\d{1,2})[：:](\d{2})[：:](\d{2})(?:[：:.](\d+))?$/);
    const d = m ? new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5],+m[6],+(m[7]||0)) : new Date(v);
@@ -14,10 +18,10 @@
  const color = s => {let h=0; for(const c of s) h=(h*31+c.charCodeAt(0))|0; return `hsl(${Math.abs(h)%360} 58% 46%)`;};
  let view='month', progress=0;
  let days={}, selected=key(new Date()), month=new Date(new Date().getFullYear(),new Date().getMonth(),1), busy=false, status='点击刷新，读取历史聊天', scanned=false, lastFocus;
- function aggregate(target, seen, char, messages, fileName='') {
+ function aggregate(target, seen, char, messages, fileName='', diagnostics) {
    for(const m of messages) {
      if(typeof m?.mes!=='string'||m.is_system) continue;
-     const d=dateOf(m.send_date); if(!d) continue;
+     const d=dateOf(m.send_date); if(!d){if(diagnostics)diagnostics.invalidDates++;continue;}
      const fingerprint=JSON.stringify([d.getTime(),!!m.is_user,m.mes]);
      const bucket=target[key(d)] ||= {};
      const item=bucket[char.avatar] ||= {name:char.name,avatar:char.avatar,user:0,char:0,first:d.getTime(),last:d.getTime(),files:[]};
@@ -74,7 +78,7 @@
    const chars=(ctx()?.characters||[]).filter(c=>c?.avatar);
    if(!chars.length){status='角色列表尚未就绪，请打开角色列表后刷新';render();return;}
    busy=true;progress=0;status='正在查找聊天存档…';render();
-   const next={},jobs=[];let errors=0,completed=0;
+   const next={},jobs=[],diagnostics={invalidDates:0};let errors=0,completed=0,readFiles=0;
    try{
      for(let i=0;i<chars.length;i++){
        const char=chars[i];
@@ -90,12 +94,15 @@
          const data=await post('/api/chats/get',{ch_name:char.name,avatar_url:char.avatar,file_name:file});
          const messages=Array.isArray(data)?data:Array.isArray(data?.chat)?data.chat:Array.isArray(data?.messages)?data.messages:Object.values(data||{});
          if(!seenByChar.has(char.avatar))seenByChar.set(char.avatar,new Set());
-         aggregate(next,seenByChar.get(char.avatar),char,messages,file);
+         aggregate(next,seenByChar.get(char.avatar),char,messages,file,diagnostics);readFiles++;
        }catch{errors++;}
        completed++;progress=Math.round(15+completed/Math.max(1,jobs.length)*85);render();
      }
      days=next;scanned=true;progress=100;
-     status=errors?'部分记录读取失败（'+errors+' 项），可刷新重试':'已整理 '+Object.keys(days).length+' 天的足迹 · '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})+' 更新';
+     const floors=Object.values(days).reduce((sum,rows)=>sum+Object.values(rows).reduce((n,r)=>n+r.user+r.char,0),0);
+     status='已整理 '+Object.keys(days).length+' 天 · 读取 '+readFiles+' 个存档 · 共 '+floors+' 楼';
+     if(errors)status+=' · '+errors+' 项读取失败，可刷新重试';
+     if(diagnostics.invalidDates)status+=' · '+diagnostics.invalidDates+' 条消息缺少有效日期，未能归档';
    }finally{busy=false;render();}
  }
  function yearSummary(data,year){
