@@ -63,3 +63,10 @@
 #tcal .tc-selected .tc-royal{background:transparent;color:#48330c}
 #tcal .tc-selected .tc-crown-body{fill:#edc754;stroke:none}
 #tcal .tc-day:hover .tc-crown-body{fill:#edcd62}
+/* Keep the dialog bounded on older Android WebViews without dvh support. */
+#tcal{overflow:hidden}
+#tcal .tc-shell{min-width:0;max-width:100%;max-height:calc(100vh - 48px);max-height:calc(100dvh - 48px);overflow-x:hidden;overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+#tcal main,#tcal aside{min-width:0}
+#tcal nav{flex-wrap:wrap;row-gap:10px}
+#tcal nav>div{flex-shrink:0}
+@media(max-width:700px){#tcal .tc-shell{max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px)}#tcal footer{flex-wrap:wrap}#tcal footer>span{overflow-wrap:anywhere}}
