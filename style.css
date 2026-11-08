@@ -75,3 +75,10 @@
 #tcal::backdrop{background:transparent}
 #tcal .tc-shell{position:relative;inset:auto;transform:none;translate:none;scale:none;rotate:none;animation:none;margin:0;min-height:0;flex:0 1 1040px;max-height:calc(var(--tc-vh,100vh) - 48px)}
 @media(max-width:700px){#tcal .tc-shell{max-height:calc(var(--tc-vh,100vh) - 16px)}}
+/* Explicit sizing and flow prevent host dialog/section layouts from leaking in. */
+#tcal{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr);place-items:center;writing-mode:horizontal-tb;direction:ltr}
+#tcal .tc-shell{display:block;box-sizing:border-box;width:100%;max-width:1040px;flex:none;align-self:center;justify-self:center;writing-mode:horizontal-tb;direction:ltr}
+#tcal .tc-body{width:100%;min-width:0;max-width:none;float:none;position:static}
+#tcal .tc-body>main,#tcal .tc-body>aside{display:block;position:static;float:none;width:auto;max-width:none;min-width:0;margin:0;transform:none;writing-mode:horizontal-tb}
+@media(min-width:701px){#tcal .tc-body:not(.tc-year-body):not(.tc-loading-body){display:grid;grid-template-columns:minmax(0,1fr) 310px;grid-auto-flow:row;align-items:stretch}#tcal .tc-body>main{grid-column:1;grid-row:1}#tcal .tc-body>aside{grid-column:2;grid-row:1}}
+@media(max-width:700px){#tcal .tc-body{display:block}#tcal .tc-body>main,#tcal .tc-body>aside{grid-column:auto;grid-row:auto}}
