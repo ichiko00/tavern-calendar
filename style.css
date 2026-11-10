@@ -84,3 +84,6 @@
 @media(max-width:700px){#tcal .tc-body{display:block}#tcal .tc-body>main,#tcal .tc-body>aside{grid-column:auto;grid-row:auto}}
 #tcal-settings-open{display:inline-flex;width:auto;min-width:max-content;max-width:none;white-space:nowrap;word-break:keep-all;overflow-wrap:normal;writing-mode:horizontal-tb;flex-shrink:0}
 #tcal-launch{width:auto;white-space:nowrap;word-break:keep-all;writing-mode:horizontal-tb}
+#tcal .tc-count-options{padding:12px 28px 0;font-size:12px;color:#837a85}
+#tcal .tc-count-options label{display:flex;align-items:center;gap:7px}
+#tcal .tc-count-options input{width:15px;height:15px;margin:0;accent-color:#eb675c}
